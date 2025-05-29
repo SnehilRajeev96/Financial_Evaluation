@@ -1,0 +1,82 @@
+2.Market Intelligence Agent
+Code 
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import json
+
+class MarketIntelligenceAgent:
+    def __init__(self, url, competitors_urls):
+        self.url = url
+        self.competitors_urls = competitors_urls
+
+    def fetch_page(self, url):
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise Exception(f"Failed to retrieve data from {url}: {response.status_code}")
+
+    def extract_data(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        data = {
+            'company_revenue': float(soup.select_one('.company-revenue').text.replace('$', '').replace(',', '')),
+            'total_addressable_market': float(soup.select_one('.market-size').text.replace('$', '').replace(',', '')),
+            'regional_revenue_growth': float(soup.select_one('.regional-growth').text.replace('%', '')),
+            'industry_diversification': int(soup.select_one('.industry-diversification').text.strip())
+        }
+        return data
+
+    def extract_competitor_growth(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        return float(soup.select_one('.competitor-growth').text.replace('%', ''))
+
+    def calculate_metrics(self, main_data, competitors_growth):
+        metrics = {}
+        
+        # Global Market Share
+        metrics['global_market_share'] = (main_data['company_revenue'] / main_data['total_addressable_market']) * 100
+
+        # Competitive Benchmarking (relative growth vs peers)
+        avg_competitor_growth = sum(competitors_growth) / len(competitors_growth)
+        metrics['competitive_growth_difference'] = main_data['regional_revenue_growth'] - avg_competitor_growth
+
+        # Regional Growth Trends
+        metrics['regional_growth'] = main_data['regional_revenue_growth']
+
+        # Client Base Diversification
+        metrics['industry_diversification_score'] = main_data['industry_diversification']
+
+        return metrics
+
+    def run(self):
+        try:
+            main_html = self.fetch_page(self.url)
+            main_data = self.extract_data(main_html)
+
+            competitors_growth = []
+            for comp_url in self.competitors_urls:
+                comp_html = self.fetch_page(comp_url)
+                competitors_growth.append(self.extract_competitor_growth(comp_html))
+
+            metrics = self.calculate_metrics(main_data, competitors_growth)
+            return metrics
+
+        except Exception as e:
+            print(f"Error running Market Intelligence Agent: {e}")
+            return None
+
+# Example usage
+if __name__ == "__main__":
+    company_url = "https://example.com/company/market"
+    competitors_urls = [
+        "https://example.com/competitor1",
+        "https://example.com/competitor2",
+        "https://example.com/competitor3"
+    ]
+
+    agent = MarketIntelligenceAgent(company_url, competitors_urls)
+    market_metrics = agent.run()
+
+    if market_metrics:
+        print(json.dumps(market_metrics, indent=4))
