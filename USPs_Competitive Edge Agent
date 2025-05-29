@@ -1,0 +1,61 @@
+5.USPs/Competitive Edge Agent
+Code
+import requests
+from bs4 import BeautifulSoup
+import json
+
+class USPsCompetitiveEdgeAgent:
+    def __init__(self, company_url):
+        self.company_url = company_url
+
+    def fetch_page(self):
+        response = requests.get(self.company_url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise Exception(f"Failed to retrieve data from {self.company_url}: {response.status_code}")
+
+    def extract_data(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        data = {
+            'emerging_tech_revenue': float(soup.select_one('.emerging-tech-revenue').text.replace('$', '').replace(',', '')),
+            'total_revenue': float(soup.select_one('.total-revenue').text.replace('$', '').replace(',', '')),
+            'strategic_partnerships_count': int(soup.select_one('.partnership-count').text.strip()),
+            'customer_satisfaction_score': float(soup.select_one('.nps-score').text.strip())
+        }
+        return data
+
+    def calculate_metrics(self, data):
+        metrics = {}
+
+        # Niche Capabilities (emerging tech revenue %)
+        metrics['niche_capabilities_percentage'] = (data['emerging_tech_revenue'] / data['total_revenue']) * 100
+
+        # Strategic Partnerships & Alliances
+        metrics['strategic_partnerships'] = data['strategic_partnerships_count']
+
+        # Customer Satisfaction (NPS or CSAT)
+        metrics['customer_satisfaction'] = data['customer_satisfaction_score']
+
+        return metrics
+
+    def run(self):
+        try:
+            html = self.fetch_page()
+            extracted_data = self.extract_data(html)
+            metrics = self.calculate_metrics(extracted_data)
+            return metrics
+
+        except Exception as e:
+            print(f"Error running USPs/Competitive Edge Agent: {e}")
+            return None
+
+# Example usage
+if __name__ == "__main__":
+    company_url = "https://example.com/company/competitive-edge"
+
+    agent = USPsCompetitiveEdgeAgent(company_url)
+    competitive_edge_metrics = agent.run()
+
+    if competitive_edge_metrics:
+        print(json.dumps(competitive_edge_metrics, indent=4))
