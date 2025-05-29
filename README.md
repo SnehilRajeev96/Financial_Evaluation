@@ -48,7 +48,8 @@ Step 3: Results are passed to CalculationScoringAgent
 Step 4: A final weighted score is computed and mapped to a revenue multiple
 Step 5: Output is served as a structured JSON — ready for dashboard visualization
 
-📈 Example Output
+
+Example Output
 {
 "scores": {
 "financial": 4.33,
@@ -61,7 +62,8 @@ Step 5: Output is served as a structured JSON — ready for dashboard visualizat
 "revenue_multiple_estimate": "11–13x"
 }
 —
-🛠 Requirements
+
+Requirements
 •	Python 3.8+
 •	requests
 •	beautifulsoup4
