@@ -41,6 +41,10 @@ Takes all outputs from the above agents and assigns a weighted score (1 to 5 sca
 o	Weighted Performance Score
 o	Estimated Revenue Multiple (6x to 16x range based on total score)
 This agent converts diverse company signals into a single, comparable valuation metric.
+ 7.CoordinatorAgent
+Serves as the central orchestrator that sequentially activates all specialized agents—Financial, Market Intelligence, Innovation/IP, ESG & Compliance, and USPs/Competitive Edge.
+ 
+ 
  How It Works
 Step 1: CoordinatorAgent calls each of the 5 specialized agents
 Step 2: Each agent scrapes or ingests company data and computes metrics
@@ -48,8 +52,7 @@ Step 3: Results are passed to CalculationScoringAgent
 Step 4: A final weighted score is computed and mapped to a revenue multiple
 Step 5: Output is served as a structured JSON — ready for dashboard visualization
 
-7.CoordinatorAgent
-Serves as the central orchestrator that sequentially activates all specialized agents—Financial, Market Intelligence, Innovation/IP, ESG & Compliance, and USPs/Competitive Edge.
+
 
 Key functions:
 
