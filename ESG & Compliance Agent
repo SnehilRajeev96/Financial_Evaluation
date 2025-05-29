@@ -1,0 +1,77 @@
+4.ESG & Compliance Agent
+Code
+import requests
+from bs4 import BeautifulSoup
+import json
+class ESGComplianceAgent:
+    def __init__(self, esg_url, compliance_url):
+        self.esg_url = esg_url
+        self.compliance_url = compliance_url
+
+    def fetch_page(self, url):
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise Exception(f"Failed to retrieve data from {url}: {response.status_code}")
+
+    def extract_esg_data(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        data = {
+            'esg_rating': soup.select_one('.esg-rating').text.strip(),
+            'female_minority_leadership_percentage': float(soup.select_one('.dei-percentage').text.replace('%', ''))
+        }
+        return data
+
+    def extract_compliance_data(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+        certifications = [cert.text.strip() for cert in soup.select('.compliance-certifications li')]
+        compliance_status = {
+            'GDPR': 'GDPR' in certifications,
+            'ISO': 'ISO' in certifications,
+            'HIPAA': 'HIPAA' in certifications
+        }
+        return compliance_status
+
+    def calculate_metrics(self, esg_data, compliance_data):
+        metrics = {}
+
+        # ESG Rating (Direct)
+        metrics['esg_rating'] = esg_data['esg_rating']
+
+        # DEI Metrics (Diversity & Inclusion)
+        metrics['dei_leadership_percentage'] = esg_data['female_minority_leadership_percentage']
+
+        # Regulatory Compliance
+        metrics['gdpr_compliant'] = compliance_data['GDPR']
+        metrics['iso_compliant'] = compliance_data['ISO']
+        metrics['hipaa_compliant'] = compliance_data['HIPAA']
+
+        return metrics
+
+    def run(self):
+        try:
+            esg_html = self.fetch_page(self.esg_url)
+            compliance_html = self.fetch_page(self.compliance_url)
+
+            esg_data = self.extract_esg_data(esg_html)
+            compliance_data = self.extract_compliance_data(compliance_html)
+
+            metrics = self.calculate_metrics(esg_data, compliance_data)
+            return metrics
+
+        except Exception as e:
+            print(f"Error running ESG & Compliance Agent: {e}")
+            return None
+
+# Example usage
+if __name__ == "__main__":
+    esg_url = "https://example.com/company/esg"
+    compliance_url = "https://example.com/company/compliance"
+
+    agent = ESGComplianceAgent(esg_url, compliance_url)
+    esg_compliance_metrics = agent.run()
+
+    if esg_compliance_metrics:
+        print(json.dumps(esg_compliance_metrics, indent=4))
+
