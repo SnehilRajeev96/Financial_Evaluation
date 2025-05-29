@@ -1,0 +1,88 @@
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import json
+# Financial Data Agent Class
+class FinancialDataAgent:
+    def __init__(self, url):
+        self.url = url
+
+    # Fetch financial webpage
+    def fetch_page(self):
+        response = requests.get(self.url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise Exception(f"Failed to retrieve data: {response.status_code}")
+    # Parse HTML and extract data
+    def extract_financial_data(self, html):
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Update these selectors based on actual website structure
+        data = {
+            'current_year_revenue': soup.select_one('.current-year-revenue').text.strip(),
+            'previous_year_revenue': soup.select_one('.previous-year-revenue').text.strip(),
+            'ebitda': soup.select_one('.ebitda').text.strip(),
+            'net_profit': soup.select_one('.net-profit').text.strip(),
+            'cash_flow_operations': soup.select_one('.cash-flow-operations').text.strip(),
+            'total_employees': soup.select_one('.total-employees').text.strip(),
+            'top_5_clients_revenue': soup.select_one('.top-5-clients-revenue').text.strip()
+        }
+
+        return data
+
+    # Clean and convert data to numeric
+    def clean_data(self, data):
+        cleaned_data = {}
+        for key, value in data.items():
+            cleaned_data[key] = float(value.replace(',', '').replace('$', '').replace('%', ''))
+        return cleaned_data
+
+    # Calculate metrics based on formulas
+    def calculate_metrics(self, data):
+        metrics = {}
+
+        # Revenue Growth Rate (YoY)
+        metrics['revenue_growth_rate'] = ((data['current_year_revenue'] - data['previous_year_revenue']) / data['previous_year_revenue']) * 100
+
+        # EBITDA Margin
+        metrics['ebitda_margin'] = (data['ebitda'] / data['current_year_revenue']) * 100
+
+        # Net Profit Margin
+        metrics['net_profit_margin'] = (data['net_profit'] / data['current_year_revenue']) * 100
+
+        # Cash Flow from Operations / Revenue
+        metrics['cash_flow_operations_to_revenue'] = (data['cash_flow_operations'] / data['current_year_revenue']) * 100
+
+        # Revenue per Employee
+        metrics['revenue_per_employee'] = data['current_year_revenue'] / data['total_employees']
+
+        # Client Concentration Risk
+        metrics['client_concentration_risk'] = (data['top_5_clients_revenue'] / data['current_year_revenue']) * 100
+
+        return metrics
+
+    # Run agent
+    def run(self):
+        try:
+            html = self.fetch_page()
+            raw_data = self.extract_financial_data(html)
+            cleaned_data = self.clean_data(raw_data)
+            calculated_metrics = self.calculate_metrics(cleaned_data)
+            return calculated_metrics
+
+        except Exception as e:
+            print(f"Error running Financial Data Agent: {e}")
+            return None
+
+
+# Example usage
+if __name__ == "__main__":
+    url = "https://investor.apple.com/investor-relations/default.aspx"
+
+    agent = FinancialDataAgent(url)
+    financial_metrics = agent.run()
+
+    if financial_metrics:
+        print(json.dumps(financial_metrics, indent=4))
+
