@@ -47,7 +47,6 @@ Step 2: Each agent scrapes or ingests company data and computes metrics
 Step 3: Results are passed to CalculationScoringAgent
 Step 4: A final weighted score is computed and mapped to a revenue multiple
 Step 5: Output is served as a structured JSON — ready for dashboard visualization
-
 7.CoordinatorAgent
 Serves as the central orchestrator that sequentially activates all specialized agents—Financial, Market Intelligence, Innovation/IP, ESG & Compliance, and USPs/Competitive Edge.
 
