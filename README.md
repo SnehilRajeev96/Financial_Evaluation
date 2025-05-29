@@ -41,7 +41,7 @@ Takes all outputs from the above agents and assigns a weighted score (1 to 5 sca
 o	Weighted Performance Score
 o	Estimated Revenue Multiple (6x to 16x range based on total score)
 This agent converts diverse company signals into a single, comparable valuation metric.
- 7.CoordinatorAgent
+ 7.         Coordinator Agent
 Serves as the central orchestrator that sequentially activates all specialized agents—Financial, Market Intelligence, Innovation/IP, ESG & Compliance, and USPs/Competitive Edge.
  
  
